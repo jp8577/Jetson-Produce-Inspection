@@ -1,8 +1,9 @@
 from ultralytics import YOLO
-import kagglehub
+
+# import kagglehub
 
 # Load a pretrained YOLOv11n model (model weights from 100 epochs trained on LVIS)
-model = YOLO("models/best.pt")
+model = YOLO("runs/detect/train-3/weights/best.pt")
 
 # Set confidence and iou (intersection on union) threshold
 conf = 0.6
