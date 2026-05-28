@@ -1,3 +1,5 @@
+<img width="1920" height="1280" alt="val_batch2_pred" src="https://github.com/user-attachments/assets/9660734c-5df8-4472-ac3a-07ff8cc6abfc" />
+
 # cs131_project
 
 Group Member: 
@@ -10,7 +12,7 @@ Sweden Agunenye
 
 Jooahn Park
 
-## Use Case
+## ✏️ Use Case
 
 As a food processing or distribution center operator, I would like to automatically identify produce type and detect whether fruits or vegetables are fresh or defective, so I can remove unsafe or low-quality produce faster, more consistently, and with less reliance on manual inspection.
 
@@ -18,7 +20,7 @@ As a business owner, I would like to collect and analyze produce quality data ov
 
 ---
 
-## Purpose for This Project
+## 💭 Purpose for This Project
 
 The purpose of this project is to address the problem of slow and inconsistent manual produce inspection in the Food & Beverage industry, specifically in food processing and distribution centers.
 
@@ -34,9 +36,9 @@ This project proposes an intelligent produce inspection system that uses cameras
 
 ---
 
-## Task Distribution
+## 🪜 Task Distribution
 
-### Edge Layer
+### 🖥️ Edge Layer
 
 The edge layer uses two NVIDIA Jetson Nano devices connected to cameras mounted around a conveyor belt. One camera can be placed above the produce, while another camera can be placed on the side to capture multiple angles.
 
@@ -52,7 +54,7 @@ The edge devices are responsible for:
 
 This allows the system to respond quickly with low latency, which is important for real-time conveyor belt inspection.
 
-### Cloud Layer
+### ☁️ Cloud Layer
 
 The cloud layer is rperesented by Google Cloud. We used a VM instance via the Compute Engine API that utilized a NVIDIA T4 GPU. Alongside a storage bucket, the cloud layer is collectively responsible for long-term storage, model training, and improvements on inference through hyperparameter tuning during retraining on new images of produce.
 
@@ -66,7 +68,7 @@ In the future,  data can help businesses identify quality problems related to su
 
 ---
 
-## Final Demo
+## 🎥 Final Demo
 
 For the final demo, we will build a proof-of-concept version of the produce inspection system.
 
