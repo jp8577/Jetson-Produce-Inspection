@@ -20,7 +20,7 @@ As a business owner, I would like to collect and analyze produce quality data ov
 
 ---
 
-## 💭 Purpose for This Project
+## 📍 Purpose for This Project
 
 The purpose of this project is to address the problem of slow and inconsistent manual produce inspection in the Food & Beverage industry, specifically in food processing and distribution centers.
 
