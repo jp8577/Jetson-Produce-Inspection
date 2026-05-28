@@ -1,4 +1,5 @@
-<img width="1920" height="1280" alt="val_batch2_pred" src="https://github.com/user-attachments/assets/30c0e940-917e-4797-8b3c-04d261d65a38" />
+<img width="1920" height="1372" alt="val_batch2_pred-2" src="https://github.com/user-attachments/assets/4f83fe23-e0b3-4184-ad27-d7d19d6a854e" />
+
 
 
 # cs131_project
