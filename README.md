@@ -77,7 +77,7 @@ For the final demo, we will build a proof-of-concept version of the produce insp
 The demo will show:
 
 - Two cameras capturing live images of fruits or vegetables.
-- Dual lightweight convolutional neural network (CNN) models (trained on YOLOv11n) running on two edge devices (NVIDIA Jetson Orin).
+- A lightweight convolutional neural network (CNN) model (trained on YOLOv11n) running on two edge devices (NVIDIA Jetson Orin).
 - The system classifying the type of produce.
 - The system detecting whether the produce is fresh or defective.
 - A live output showing the prediction result, such as `Fresh Apple`, `Rotten Banana`, or `Defective Tomato`.
