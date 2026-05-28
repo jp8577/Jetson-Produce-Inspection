@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # This script was used in a Compute Engine VM instance in its secure shell.
-# It should have to be reconfigured to be used in a local IDE not running Linux (optimised for Deep Learning VMs).
+# It should have to be reconfigured to be used in a local IDE not running Linux (optimised for Deep Learning VMs with Pytorch and CUDA).
+# includes data.yaml for LVIS Fruits and Vegetables dataset (poor mAP50-95 and F1 score after 100 training epochs, likely class imbalance)
 
 # virtual screen 
 sudo apt-get update

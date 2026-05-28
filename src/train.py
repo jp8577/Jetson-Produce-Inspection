@@ -1,3 +1,8 @@
+# This is the original training script used for a pretrained YOLOv11n model on the
+# LVIS Fruits and Vegetables dataset. (code artifact)
+# The current model was trained in a Kaggle notebook on the food freshness dataset
+# before being annotated in Roboflow Universe to create bounding boxes.
+
 from ultralytics import YOLO
 
 
