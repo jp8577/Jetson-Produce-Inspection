@@ -1,3 +1,7 @@
+# Independent instance of YOLOv11n for inference
+# The upload to GCP storage bucket should be integrated into both
+#   client and server scripts using ZeroMQ
+
 import cv2
 import time
 from pathlib import Path
