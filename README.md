@@ -167,3 +167,8 @@ Live inference examples from the Orin Nano are in [`Example_Results/`](Example_R
 This was a four-person project: **Jake Wang, Junwen Yu, Sweden Agunenye, and Jooahn Park.**
 
 Jake Wang owned the training pipeline, dataset aggregation, and model versioning.
+
+---
+
+## A Note on AI Assistance
+All code, model training, dataset curation, and system architecture in this repository were designed and implemented by the team members listed above. Claude (Anthropic) was used solely to clean up and professionalize the presentation of this repository — formatting the README, removing coursework-specific language, and tidying documentation. No code was generated, suggested, or modified by AI.
