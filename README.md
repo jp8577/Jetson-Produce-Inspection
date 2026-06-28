@@ -1,88 +1,169 @@
-<img width="1920" height="1372" alt="val_batch2_pred-2" src="https://github.com/user-attachments/assets/4f83fe23-e0b3-4184-ad27-d7d19d6a854e" />
+# Distributed Edge AI — Real-Time Produce Inspection
 
-
-
-# cs131_project
-
-Group Member: 
-
-Jake Wang
-
-Junwen Yu
-
-Sweden Agunenye
-
-Jooahn Park
-
-## ✏️ Use Case
-
-As a food processing or distribution center operator, I would like to automatically identify produce type and detect whether fruits or vegetables are fresh or defective, so I can remove unsafe or low-quality produce faster, more consistently, and with less reliance on manual inspection.
-
-As a business owner, I would like to collect and analyze produce quality data over time, so I can identify patterns related to suppliers, storage, transportation, or processing issues.
+A two-device edge inference system that detects and classifies fresh and defective produce in real time, with confidence-based cross-device consensus and automatic upload to Google Cloud Storage.
 
 ---
 
-## 📍 Purpose for This Project
+## Overview
 
-The purpose of this project is to address the problem of slow and inconsistent manual produce inspection in the Food & Beverage industry, specifically in food processing and distribution centers.
-
-Currently, many facilities rely on human workers to inspect produce before it reaches the market. This creates several challenges:
-
-- Human judgment can vary between workers.
-- Manual inspection is slower and harder to scale.
-- Produce can vary widely in color, shape, size, and texture.
-- Defects such as discoloration, scratches, dents, mold, or rotten areas can be difficult to detect accurately.
-- Large processing centers may handle hundreds of thousands of items, requiring fast real-time detection.
-
-This project proposes an intelligent produce inspection system that uses cameras, edge computing, and cloud computing to conduct real-time image classification and defect detection.
+Manual produce inspection in food-processing and distribution centers is slow, inconsistent, and hard to scale. This system deploys two NVIDIA Jetson Orin Nano devices — each connected to a USB camera — running a fine-tuned YOLOv11n model locally on the edge. The devices exchange detection results over a direct-Ethernet ZeroMQ link, apply confidence-based consensus to pick the strongest detection each frame, upload annotated frames to Google Cloud Storage, and serve a live annotated video stream via Flask to any browser on the local network.
 
 ---
 
-## 🪜 Task Distribution
+## Architecture
 
-### 🖥️ Edge Layer
+```
+Camera ──► Jetson Orin Nano 1 (server.py)
+                     │
+               ZeroMQ PAIR
+               TCP port 5555
+                     │
+Camera ──► Jetson Orin Nano 2 (client.py)
+                     │
+          Confidence-based consensus
+                     │
+          ┌──────────┴──────────┐
+          │                     │
+   GCS bucket             Flask stream
+ (annotated frames)       http://:5000
+```
 
-The edge layer uses two NVIDIA Jetson Nano devices connected to cameras mounted around a conveyor belt. One camera can be placed above the produce, while another camera can be placed on the side to capture multiple angles.
+**Nano 1 — `models/server.py`**
+- Binds a ZeroMQ PAIR socket on `tcp://*:5555`
+- Runs YOLOv11n inference at 12 FPS (FP16 half-precision)
+- Hosts a Flask app with MJPEG live stream (`/video`) and JSON result endpoint (`/result`)
+- Uploads winning-confidence annotated frames to Google Cloud Storage
 
-The edge devices are responsible for:
+**Nano 2 — `models/client.py`**
+- Connects to Nano 1's ZeroMQ socket
+- Runs the same YOLOv11n model independently at 12 FPS (FP16)
+- Exchanges detection JSON with Nano 1 each frame; the device with higher confidence wins
+- Also uploads frames to GCS when it wins the consensus
 
-- Capturing live images of produce.
-- Running a lightweight CNN model locally.
-- Identifying the type of produce.
-- Detecting whether the produce is fresh or defective.
-- Making real-time decisions without depending on the cloud.
-- Sending a signal to a robotic arm to remove defective produce.
-- Forwarding captured images and detection metadata to the fog layer.
-
-This allows the system to respond quickly with low latency, which is important for real-time conveyor belt inspection.
-
-### ☁️ Cloud Layer
-
-The cloud layer is rperesented by Google Cloud. We used a VM instance via the Compute Engine API that utilized a NVIDIA T4 GPU. Alongside a storage bucket, the cloud layer is collectively responsible for long-term storage, model training, and improvements on inference through hyperparameter tuning during retraining on new images of produce.
-
-The cloud layer is also used for:
-
-- Storing historical detection results.
-- Sending updated model versions back to the edge devices.
-- Supporting long-term analysis of produce quality trends.
-
-In the future,  data can help businesses identify quality problems related to suppliers, storage conditions, or transportation.
+**Cloud — Google Cloud Platform**
+- GCS bucket stores annotated detection frames for audit and retraining
+- GCP Compute Engine VM (NVIDIA T4 GPU) was used for model training
 
 ---
 
-## 🎥 Final Demo
+## Features
 
-For the final demo, we will build a proof-of-concept version of the produce inspection system.
+- Real-time object detection at 12 FPS across two concurrent edge devices
+- Classifies produce type and freshness state — e.g., `Fresh Apple`, `Rotten Banana`, `Defective Tomato`
+- Two-device confidence consensus over ZeroMQ: highest-confidence detection is selected each frame
+- Auto-reconnect if either device goes silent for ~10 seconds
+- Live annotated video stream via Flask, viewable from any browser on the local network
+- Automatic GCS upload of winning detection frames for retraining data collection
+- FP16 half-precision inference for efficient GPU utilization on Orin Nano
+- Standalone single-device mode (`models/model.py`) for testing without a second device
 
-The demo will show:
+---
 
-- Two cameras capturing live images of fruits or vegetables.
-- A lightweight convolutional neural network (CNN) model (trained on YOLOv11n) running on two edge devices (NVIDIA Jetson Orin).
-- The system classifying the type of produce.
-- The system detecting whether the produce is fresh or defective.
-- A live output showing the prediction result, such as `Fresh Apple`, `Rotten Banana`, or `Defective Tomato`.
-- A cloud-hosted version of the model that represents how retraining and updates on weights would work in the full-scale system.
+## Tech Stack
 
-Physically, the demo can be shown by placing produce in front of the camera or moving it through a small mock conveyor setup. The camera will capture the produce, the model will process the image, and the result will be displayed in real time.
+| Layer | Technology |
+|---|---|
+| Model | YOLOv11n (Ultralytics) |
+| Inference | OpenCV, PyTorch, CUDA (FP16) |
+| Device communication | ZeroMQ PAIR socket over direct Ethernet |
+| Web stream | Flask (MJPEG + JSON polling) |
+| Cloud storage | Google Cloud Storage |
+| Training | Ultralytics, GCP Compute Engine (NVIDIA T4) |
+| Hardware | 2× NVIDIA Jetson Orin Nano, 2× USB cameras |
+| Language | Python 3 |
 
-This proof of concept demonstrates how the full system could be used in a real food processing center to automatically inspect produce and remove defective items before they reach consumers.
+---
+
+## Dataset
+
+The model was trained on a merged dataset of approximately **10,750 images** across **26 produce classes**, covering fresh and defective states of common fruits and vegetables.
+
+**Sources:**
+- [Food Freshness Dataset](https://www.kaggle.com/datasets/ulnnproject/food-freshness-dataset) (Kaggle) — downloaded via `src/dataset.py`
+- Bounding-box annotations added through Roboflow Universe
+
+An earlier training attempt using the LVIS Fruits and Vegetables dataset (63 classes) was abandoned due to class imbalance and poor mAP50-95 after 100 epochs. The setup script for that run is preserved at `configs/setup_training.sh`.
+
+---
+
+## Setup & Run
+
+### Prerequisites
+
+- 2× NVIDIA Jetson Orin Nano with USB cameras on `/dev/video0`
+- Python 3.9+
+- GCP service account key at `configs/keys.json` (gitignored — provision from GCP IAM and grant Storage Object Admin on the target bucket)
+- Both devices on the same network (direct Ethernet recommended for latency)
+
+### Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### Two-device inference
+
+**On Nano 1 (server — binds ZeroMQ, serves web stream):**
+```bash
+python models/server.py
+```
+The Flask dashboard is accessible at `http://<nano1-ip>:5000`. The MJPEG stream is at `/video`; the latest detection JSON is at `/result`.
+
+**On Nano 2 (client — connects to Nano 1):**
+```bash
+python models/client.py
+# Prompts: "Enter Nano 1's IP address: "
+```
+
+### Single-device inference
+
+For standalone testing without a second device:
+```bash
+python models/model.py
+```
+This runs inference on `/dev/video0` and uploads detections directly to GCS.
+
+### Retrain the model
+
+```bash
+# Download the Kaggle dataset
+python src/dataset.py
+
+# Place your annotated data.yaml at the project root, then train
+python src/train.py
+```
+
+Trained weights are saved to `runs/detect/<run>/weights/best.pt`. The pretrained YOLOv11n base (`yolo11n.pt`) is fetched automatically by Ultralytics on first run.
+
+> **Hardware note:** Inference scripts use `device=0` (GPU) and `half=True` (FP16). For CPU-only testing, set `device="cpu"` and `half=False` in the relevant script.
+
+---
+
+## Results
+
+Training ran for 50 epochs on GCP (NVIDIA T4). Final validation metrics on the held-out set:
+
+| Metric | Value |
+|---|---|
+| mAP50 | 0.828 |
+| mAP50-95 | 0.728 |
+| Precision | 0.857 |
+| Recall | 0.759 |
+
+**Validation predictions (epoch 50):**
+
+![Validation batch predictions](runs/detect/train-9/val_batch0_pred.jpg)
+
+**Training curves:**
+
+![Training results](runs/detect/train-9/results.png)
+
+Live inference examples from the Orin Nano are in [`Example_Results/`](Example_Results/).
+
+---
+
+## Team
+
+This was a four-person project: **Jake Wang, Junwen Yu, Sweden Agunenye, and Jooahn Park.**
+
+Jake Wang owned the training pipeline, dataset aggregation, and model versioning.

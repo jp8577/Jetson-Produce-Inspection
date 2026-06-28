@@ -2,8 +2,6 @@ import cv2
 import json
 import time
 from pathlib import Path
-import threading
-from flask import Flask, Response, render_template_string
 from ultralytics import YOLO
 import zmq
 from google.cloud import storage

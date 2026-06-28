@@ -1,6 +1,5 @@
-# Independent instance of YOLOv11n for inference
-# The upload to GCP storage bucket should be integrated into both
-#   client and server scripts using ZeroMQ
+# Standalone single-device inference script.
+# For two-device inference with ZeroMQ and Flask streaming, use server.py and client.py.
 
 import cv2
 import time
@@ -9,7 +8,7 @@ from ultralytics import YOLO
 from google.cloud import storage
 
 # Google Cloud service account configuration
-GCP_KEY_PATH = "configs/key.json"
+GCP_KEY_PATH = "configs/keys.json"
 BUCKET_NAME = "cs131-detections"
 
 
